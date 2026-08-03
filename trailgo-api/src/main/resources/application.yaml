@@ -1,7 +1,9 @@
+# trailgo-api/src/main/resources/application.yaml
 spring:
   application:
     name: trailgo-api
 
+  # --------- Connexion a PostgreSQL ---------
   datasource:
     url: jdbc:postgresql://localhost:5432/trailgo
     username: postgres
@@ -9,15 +11,51 @@ spring:
 
   jpa:
     hibernate:
+      # validate : c'est Flyway qui cree le schema, Hibernate se contente
+      # de verifier que les entites y correspondent.
+      # NE JAMAIS mettre "update" : Hibernate ne sait pas creer les
+      # index GIST dont PostGIS a besoin.
       ddl-auto: validate
     open-in-view: false
     properties:
       hibernate:
         format_sql: true
 
+  # --------- Migrations de base de donnees ---------
   flyway:
     enabled: true
     baseline-on-migrate: true
 
+  # --------- Upload de fichiers (images, GPX) ---------
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
 server:
   port: 8080
+
+# --------- Documentation Swagger ---------
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+
+# --------- Parametres applicatifs ---------
+trailgo:
+  jwt:
+    # Cle de signature HS256, encodee en Base64, 256 bits minimum.
+    # A REGENERER avant tout deploiement reel :
+    #   openssl rand -base64 32
+    secret: Q2hhbmdlTWVCZWZvcmVUaGVEZW1vUGxlYXNlU2VyaW91c2x5MTIz
+    # 24 heures en millisecondes
+    expiration-ms: 86400000
+
+  storage:
+    # Dossier de stockage des images, relatif au repertoire de lancement.
+    # Il est cree automatiquement au demarrage s'il n'existe pas.
+    # A ajouter dans .gitignore pour ne pas versionner les images de test.
+    upload-dir: ./uploads

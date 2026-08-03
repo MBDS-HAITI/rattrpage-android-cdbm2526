@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -58,7 +59,7 @@ public class GestionnaireExceptions {
     public ProblemDetail validation(MethodArgumentNotValidException ex) {
         Map<String, String> erreurs = new LinkedHashMap<>();
         ex.getBindingResult().getFieldErrors()
-          .forEach(f -> erreurs.putIfAbsent(f.getField(), f.getDefaultMessage()));
+                .forEach(f -> erreurs.putIfAbsent(f.getField(), f.getDefaultMessage()));
 
         ProblemDetail probleme = construire(HttpStatus.BAD_REQUEST, "Donnees invalides",
                 "La requete contient %d champ(s) invalide(s)".formatted(erreurs.size()),
@@ -81,6 +82,22 @@ public class GestionnaireExceptions {
         return construire(HttpStatus.BAD_REQUEST, "Parametre de type incorrect",
                 "Le parametre '%s' n'a pas le type attendu".formatted(ex.getName()),
                 "type-incorrect");
+    }
+
+    /**
+     * Exceptions natives de Spring : ressource statique absente, methode
+     * HTTP non supportee, redirection interne...
+     *
+     * CE HANDLER EST INDISPENSABLE. Sans lui, le attrape-tout ci-dessous
+     * capture ces exceptions techniques et les transforme en 500, ce qui
+     * casse notamment la redirection de Swagger UI vers /swagger-ui/index.html.
+     *
+     * Spring a deja construit un ProblemDetail correct dans ces cas :
+     * on se contente de le renvoyer tel quel.
+     */
+    @ExceptionHandler(ErrorResponseException.class)
+    public ProblemDetail erreurSpring(ErrorResponseException ex) {
+        return ex.getBody();
     }
 
     /**

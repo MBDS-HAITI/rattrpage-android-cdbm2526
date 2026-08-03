@@ -52,11 +52,21 @@ public class ParcoursService {
                                                             Integer dureeMax,
                                                             String recherche,
                                                             Pageable pageable) {
-        String termeNettoye = (recherche == null || recherche.isBlank())
-                ? null : recherche.trim();
+
+        // POINT CRITIQUE : ce motif ne doit JAMAIS valoir null.
+        //
+        // 1. En SQL, "titre LIKE null" ne vaut pas "vrai" mais "inconnu",
+        //    ce qui exclut toutes les lignes : la liste reviendrait vide.
+        // 2. Un parametre String null empeche aussi PostgreSQL de deduire
+        //    son type et provoque l'erreur "function lower(bytea) does not exist".
+        //
+        // "%" est le joker SQL : la condition est alors toujours vraie.
+        String motif = (recherche == null || recherche.isBlank())
+                ? "%"
+                : "%" + recherche.trim().toLowerCase() + "%";
 
         Page<Parcours> page = parcoursRepository.rechercher(
-                theme, difficulte, statut, dureeMax, termeNettoye, pageable);
+                theme, difficulte, statut, dureeMax, motif, pageable);
 
         return PageResponse.de(page, mapper::versResume);
     }

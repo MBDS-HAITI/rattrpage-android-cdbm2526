@@ -68,6 +68,12 @@ public class SecurityConfig {
                         // --- Consultation publique des parcours ---
                         .requestMatchers(HttpMethod.GET, "/api/parcours/**").permitAll()
 
+                        // Consultation publique des zones (affichage sur la carte).
+                        .requestMatchers(HttpMethod.GET, "/api/zones/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,   "/api/zones/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT,    "/api/zones/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/zones/**").hasRole("ADMIN")
+
                         // --- Administration ---
                         .requestMatchers(HttpMethod.POST,   "/api/parcours/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT,    "/api/parcours/**").hasRole("ADMIN")

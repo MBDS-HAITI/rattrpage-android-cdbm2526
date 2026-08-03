@@ -61,6 +61,9 @@ public class SecurityConfig {
                         // ni React ni Android ne pourraient les afficher dans
                         // une balise <img>.
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
+                        // Recherches spatiales : publiques, l'application mobile doit
+                        // pouvoir chercher "autour de moi" sans connexion.
+                        .requestMatchers(HttpMethod.GET, "/api/recherche/**").permitAll()
 
                         // --- Consultation publique des parcours ---
                         .requestMatchers(HttpMethod.GET, "/api/parcours/**").permitAll()

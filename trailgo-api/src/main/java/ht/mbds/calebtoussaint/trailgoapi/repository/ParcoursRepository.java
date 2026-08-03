@@ -21,17 +21,10 @@ public interface ParcoursRepository extends JpaRepository<Parcours, Long> {
     /**
      * Recherche avec filtres optionnels.
      *
-     * ATTENTION AU PARAMETRE "recherche" :
-     * il ne doit JAMAIS valoir null. Quand un parametre String vaut null,
-     * le pilote PostgreSQL ne peut pas deviner son type et l'envoie comme
-     * "bytea" (binaire). PostgreSQL cherche alors LOWER(bytea), qui
-     * n'existe pas, et rejette la requete.
-     *
-     * Le service passe donc "%" (le joker SQL) quand aucune recherche
-     * n'est demandee : la condition est alors toujours vraie.
-     *
-     * COALESCE sur la description : elle peut etre null en base, et
-     * "null LIKE '%'" vaut null (donc faux) et non vrai.
+     * ATTENTION AU PARAMETRE "recherche" : il ne doit JAMAIS valoir null.
+     * En SQL, "titre LIKE null" ne vaut pas "vrai" mais "inconnu", ce qui
+     * exclut toutes les lignes. Le service passe "%" quand aucune
+     * recherche n'est demandee.
      */
     @Query("""
            SELECT p FROM Parcours p
@@ -63,4 +56,32 @@ public interface ParcoursRepository extends JpaRepository<Parcours, Long> {
     @Modifying
     @Query("UPDATE Parcours p SET p.nbConsultations = p.nbConsultations + 1 WHERE p.id = :id")
     void incrementerConsultations(@Param("id") Long id);
+
+    // =================================================================
+    // REQUETES SPATIALES
+    // =================================================================
+
+    /**
+     * Longueur reelle du trace, en kilometres.
+     *
+     * LE CAST ::geography EST L'ELEMENT ESSENTIEL DE CETTE REQUETE.
+     *
+     * En SRID 4326 les coordonnees sont des DEGRES d'angle. ST_Length
+     * applique directement au type "geometry" calculerait une longueur
+     * plate exprimee en degres, sans aucun sens physique (typiquement
+     * 0.03 pour un parcours de 3 km).
+     *
+     * Le cast en "geography" force PostGIS a faire un calcul geodesique
+     * sur l'ellipsoide WGS84, qui renvoie des metres. On divise par 1000
+     * pour obtenir des kilometres.
+     *
+     * Requete native : le cast ::geography et ST_Length n'existent pas
+     * en JPQL, c'est du SQL propre a PostGIS.
+     */
+    @Query(value = """
+            SELECT ST_Length(p.trace::geography) / 1000.0
+            FROM parcours p
+            WHERE p.id = :id AND p.trace IS NOT NULL
+            """, nativeQuery = true)
+    Double calculerDistanceKm(@Param("id") Long id);
 }

@@ -1,0 +1,90 @@
+/* src/components/CarteParcours.css */
+
+.carte-parcours {
+  display: block;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.carte-parcours:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.carte-parcours-image {
+  position: relative;
+  height: 160px;
+  background: #e5e7eb;
+}
+
+.carte-parcours-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.carte-parcours-image-vide {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  font-size: 0.85rem;
+}
+
+.badge-statut {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-publie {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge-brouillon {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.carte-parcours-contenu {
+  padding: 1rem;
+}
+
+.carte-parcours-contenu h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  color: #111827;
+}
+
+.carte-parcours-tags {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+}
+
+.tag {
+  background: #f3f4f6;
+  color: #374151;
+  padding: 0.15rem 0.55rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.carte-parcours-infos {
+  display: flex;
+  gap: 0.8rem;
+  font-size: 0.8rem;
+  color: #6b7280;
+}

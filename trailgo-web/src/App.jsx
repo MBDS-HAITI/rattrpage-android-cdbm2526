@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import PageConnexion from './pages/PageConnexion';
 import PageListeParcours from './pages/PageListeParcours';
 import PageDetailParcours from './pages/PageDetailParcours';
+import PageFormulaireParcours from './pages/PageFormulaireParcours';
 
 function RouteProtegee({ children }) {
   const { estConnecte, chargement } = useAuth();
@@ -33,11 +34,31 @@ function App() {
             }
           />
 
+          {/* Route specifique AVANT /parcours/:id, sinon "nouveau"
+              serait interprete comme un identifiant de parcours. */}
+          <Route
+            path="/parcours/nouveau"
+            element={
+              <RouteProtegee>
+                <PageFormulaireParcours />
+              </RouteProtegee>
+            }
+          />
+
           <Route
             path="/parcours/:id"
             element={
               <RouteProtegee>
                 <PageDetailParcours />
+              </RouteProtegee>
+            }
+          />
+
+          <Route
+            path="/parcours/:id/modifier"
+            element={
+              <RouteProtegee>
+                <PageFormulaireParcours />
               </RouteProtegee>
             }
           />

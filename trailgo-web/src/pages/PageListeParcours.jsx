@@ -1,5 +1,6 @@
 // src/pages/PageListeParcours.jsx
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { listerParcours } from '../api/parcoursApi';
 import { useAuth } from '../context/AuthContext';
 import CarteParcours from '../components/CarteParcours';
@@ -16,7 +17,7 @@ function PageListeParcours() {
   const [recherche, setRecherche] = useState('');
   const [page, setPage] = useState(0);
 
-  const { utilisateur, deconnecter } = useAuth();
+  const { utilisateur, estAdmin, deconnecter } = useAuth();
 
   // Se redeclenche a chaque changement de filtre ou de page : React
   // recharge automatiquement la liste sans qu'on ait a le demander
@@ -71,6 +72,11 @@ function PageListeParcours() {
       <header className="entete">
         <h1>Parcours touristiques</h1>
         <div className="info-utilisateur">
+          {estAdmin && (
+            <Link to="/parcours/nouveau" className="bouton-nouveau-parcours">
+              + Nouveau parcours
+            </Link>
+          )}
           <span>{utilisateur?.nom} ({utilisateur?.role})</span>
           <button onClick={deconnecter}>Deconnexion</button>
         </div>

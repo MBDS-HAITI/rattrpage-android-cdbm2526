@@ -109,3 +109,17 @@
   font-size: 0.9rem;
   color: #4b5563;
 }
+
+.bouton-nouveau-parcours {
+  padding: 0.45rem 0.9rem;
+  background: #2563eb;
+  color: white;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.bouton-nouveau-parcours:hover {
+  background: #1d4ed8;
+}

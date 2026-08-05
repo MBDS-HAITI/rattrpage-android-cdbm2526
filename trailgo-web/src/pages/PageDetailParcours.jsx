@@ -122,6 +122,9 @@ function PageDetailParcours() {
 
         {estAdmin && (
           <div className="actions-admin">
+            <Link to={`/parcours/${id}/modifier`} className="bouton-secondaire">
+              Modifier
+            </Link>
             <button
               onClick={gererPublication}
               disabled={actionEnCours}

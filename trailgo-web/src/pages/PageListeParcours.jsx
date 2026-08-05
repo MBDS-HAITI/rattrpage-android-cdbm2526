@@ -76,6 +76,9 @@ function PageListeParcours() {
             <Link to="/dashboard" className="lien-carte">📊 Tableau de bord</Link>
           )}
           {estAdmin && (
+            <Link to="/utilisateurs" className="lien-carte">👤 Utilisateurs</Link>
+          )}
+          {estAdmin && (
             <Link to="/moderation" className="lien-carte">🚩 Moderation</Link>
           )}
           <Link to="/carte" className="lien-carte">🗺️ Carte</Link>

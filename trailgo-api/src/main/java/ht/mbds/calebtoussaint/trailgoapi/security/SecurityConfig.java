@@ -21,21 +21,10 @@ import java.util.List;
 /**
  * Regles de securite de l'API.
  *
- * =====================================================================
- * L'ORDRE DES REGLES EST DETERMINANT
- * =====================================================================
- * Spring Security applique LA PREMIERE regle qui correspond a l'URL.
- *
- * Exemple concret : la regle
- *     POST /api/parcours/**  -> ADMIN
- * couvrirait aussi
- *     POST /api/parcours/1/avis
- * qui doit rester ouvert a tout utilisateur connecte.
- *
- * Les regles specifiques (avis) sont donc placees AVANT les regles
- * generiques (parcours). Inverser les deux empecherait tout touriste
- * de noter un parcours, avec un 403 difficile a diagnostiquer.
- * =====================================================================
+ * L'ORDRE DES REGLES EST DETERMINANT : Spring Security applique la
+ * PREMIERE regle qui correspond a l'URL. Les regles specifiques (avis)
+ * sont placees avant les regles generiques (parcours) pour la meme
+ * raison.
  */
 @Configuration
 @EnableWebSecurity
@@ -47,14 +36,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-                // CSRF protege les formulaires avec cookies de session.
-                // Une API REST sans session n'en a pas besoin.
                 .csrf(csrf -> csrf.disable())
-
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-                // STATELESS : aucune session cote serveur, toute
-                // l'information d'authentification vient du jeton.
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
@@ -62,9 +45,9 @@ public class SecurityConfig {
 
                         // ---------- Ouvert a tous ----------
                         .requestMatchers("/api/auth/inscription",
-                                "/api/auth/connexion").permitAll()
+                                         "/api/auth/connexion").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html",
-                                "/v3/api-docs/**").permitAll()
+                                         "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/recherche/**").permitAll()
 
@@ -73,13 +56,15 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/avis/*/signalement").hasRole("ADMIN")
 
                         // ---------- Avis : lecture publique, ecriture connectee ----------
-                        // CES REGLES DOIVENT PRECEDER CELLES DES PARCOURS.
                         .requestMatchers(HttpMethod.GET,  "/api/parcours/*/avis/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/parcours/*/avis").authenticated()
                         .requestMatchers("/api/avis/**").authenticated()
 
-                        // ---------- Favoris : toujours authentifie ----------
+                        // ---------- Favoris ----------
                         .requestMatchers("/api/favoris/**").authenticated()
+
+                        // ---------- Gestion des utilisateurs, reservee ADMIN ----------
+                        .requestMatchers("/api/utilisateurs/**").hasRole("ADMIN")
 
                         // ---------- Parcours ----------
                         .requestMatchers(HttpMethod.GET,    "/api/parcours/**").permitAll()
@@ -103,21 +88,11 @@ public class SecurityConfig {
                 .build();
     }
 
-    /**
-     * BCrypt : algorithme concu pour les mots de passe. Volontairement
-     * lent, ce qui rend la force brute impraticable, et integrant un sel
-     * aleatoire, de sorte que deux mots de passe identiques donnent des
-     * empreintes differentes.
-     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * CORS : autorise le back office React (port 5173 en developpement)
-     * a appeler l'API depuis une autre origine.
-     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

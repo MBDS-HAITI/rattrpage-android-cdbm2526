@@ -1,0 +1,111 @@
+/* src/pages/PageUtilisateurs.css */
+
+.page-utilisateurs {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.entete-utilisateurs {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.entete-utilisateurs h1 {
+  margin: 0 0 0.2rem;
+  font-size: 1.4rem;
+}
+
+.sous-titre {
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.tableau-utilisateurs {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tableau-utilisateurs th {
+  text-align: left;
+  padding: 0.7rem 1rem;
+  background: #f9fafb;
+  font-size: 0.8rem;
+  color: #6b7280;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tableau-utilisateurs td {
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 0.88rem;
+}
+
+.tableau-utilisateurs tr:last-child td {
+  border-bottom: none;
+}
+
+.ligne-inactive {
+  opacity: 0.55;
+}
+
+.tableau-utilisateurs select {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.tableau-utilisateurs select:disabled {
+  background: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.badge-actif {
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-actif-oui {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge-actif-non {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.cellule-date {
+  color: #9ca3af;
+  font-size: 0.82rem;
+}
+
+.etiquette-vous {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.tableau-utilisateurs button {
+  padding: 0.35rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.tableau-utilisateurs button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

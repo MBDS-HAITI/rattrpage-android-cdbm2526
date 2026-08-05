@@ -13,6 +13,7 @@ import {
   modifierParcours,
 } from '../api/parcoursApi';
 import { televerserImage } from '../api/fichierApi';
+import { urlAbsolueImage } from '../utils/images';
 import './PageFormulaireParcours.css';
 
 const THEMES = ['CULTUREL', 'GASTRONOMIQUE', 'NATUREL', 'HISTORIQUE'];
@@ -288,7 +289,7 @@ function PageFormulaireParcours() {
             <input id="image" type="file" accept="image/*" onChange={gererChoixImage} />
             {televersementImage && <span className="info-televersement">Televersement...</span>}
             {imageCouverture && (
-              <img src={imageCouverture} alt="Apercu" className="apercu-image" />
+              <img src={urlAbsolueImage(imageCouverture)} alt="Apercu" className="apercu-image" />
             )}
           </div>
         </section>

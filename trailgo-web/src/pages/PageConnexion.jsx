@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import ArrierePlanTraces from '../components/ArrierePlanTraces';
 import './PageConnexion.css';
 
 function PageConnexion() {
@@ -35,6 +36,8 @@ function PageConnexion() {
 
   return (
     <div className="page-connexion">
+      <ArrierePlanTraces />
+
       <div className="carte-connexion">
         <h1>TrailGo</h1>
         <p className="sous-titre">Administration des parcours touristiques</p>

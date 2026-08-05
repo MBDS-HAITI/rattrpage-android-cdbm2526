@@ -2,6 +2,7 @@
 package ht.mbds.calebtoussaint.trailgoapi.repository;
 
 import ht.mbds.calebtoussaint.trailgoapi.domain.Utilisateur;
+import ht.mbds.calebtoussaint.trailgoapi.domain.enums.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,4 +15,7 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
     Optional<Utilisateur> findByEmailIgnoreCase(String email);
 
     boolean existsByEmailIgnoreCase(String email);
+
+    /** Utilise pour empecher de retirer le dernier administrateur actif. */
+    long countByRoleAndActifTrue(Role role);
 }

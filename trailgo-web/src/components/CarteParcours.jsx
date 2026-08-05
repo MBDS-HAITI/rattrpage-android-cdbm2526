@@ -1,10 +1,6 @@
 // src/components/CarteParcours.jsx
-//
-// Une "carte" visuelle representant un parcours dans la liste.
-// Composant purement presentationnel : il ne fait aucun appel API,
-// il recoit ses donnees par props et affiche.
-
 import { Link } from 'react-router-dom';
+import { urlAbsolueImage } from '../utils/images';
 import './CarteParcours.css';
 
 const LIBELLES_THEME = {
@@ -22,12 +18,13 @@ const LIBELLES_DIFFICULTE = {
 
 function CarteParcours({ parcours }) {
   const estPublie = parcours.statut === 'PUBLIE';
+  const urlImage = urlAbsolueImage(parcours.imageCouverture);
 
   return (
     <Link to={`/parcours/${parcours.id}`} className="carte-parcours">
       <div className="carte-parcours-image">
-        {parcours.imageCouverture ? (
-          <img src={parcours.imageCouverture} alt={parcours.titre} />
+        {urlImage ? (
+          <img src={urlImage} alt={parcours.titre} />
         ) : (
           <div className="carte-parcours-image-vide">Aucune image</div>
         )}

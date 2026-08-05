@@ -8,7 +8,16 @@ import PageFormulaireParcours from './pages/PageFormulaireParcours';
 import PageCarteGenerale from './pages/PageCarteGenerale';
 import PageDashboard from './pages/PageDashboard';
 import PageModerationAvis from './pages/PageModerationAvis';
+import PageUtilisateurs from './pages/PageUtilisateurs';
+import ArrierePlanTraces from './components/ArrierePlanTraces';
+import './App.css';
 
+/**
+ * Protege une route ET l'habille du meme fond decoratif que la page de
+ * connexion, pour une identite visuelle coherente sur tout le back
+ * office. Le fond est place une seule fois ici plutot que d'etre
+ * duplique dans chacune des huit pages.
+ */
 function RouteProtegee({ children }) {
   const { estConnecte, chargement } = useAuth();
 
@@ -18,7 +27,13 @@ function RouteProtegee({ children }) {
   if (!estConnecte) {
     return <Navigate to="/connexion" replace />;
   }
-  return children;
+
+  return (
+    <div className="mise-en-page-app">
+      <ArrierePlanTraces />
+      <div className="contenu-mise-en-page">{children}</div>
+    </div>
+  );
 }
 
 function App() {
@@ -28,68 +43,14 @@ function App() {
         <Routes>
           <Route path="/connexion" element={<PageConnexion />} />
 
-          <Route
-            path="/parcours"
-            element={
-              <RouteProtegee>
-                <PageListeParcours />
-              </RouteProtegee>
-            }
-          />
-
-          <Route
-            path="/dashboard"
-            element={
-              <RouteProtegee>
-                <PageDashboard />
-              </RouteProtegee>
-            }
-          />
-
-          <Route
-            path="/moderation"
-            element={
-              <RouteProtegee>
-                <PageModerationAvis />
-              </RouteProtegee>
-            }
-          />
-
-          <Route
-            path="/carte"
-            element={
-              <RouteProtegee>
-                <PageCarteGenerale />
-              </RouteProtegee>
-            }
-          />
-
-          <Route
-            path="/parcours/nouveau"
-            element={
-              <RouteProtegee>
-                <PageFormulaireParcours />
-              </RouteProtegee>
-            }
-          />
-
-          <Route
-            path="/parcours/:id"
-            element={
-              <RouteProtegee>
-                <PageDetailParcours />
-              </RouteProtegee>
-            }
-          />
-
-          <Route
-            path="/parcours/:id/modifier"
-            element={
-              <RouteProtegee>
-                <PageFormulaireParcours />
-              </RouteProtegee>
-            }
-          />
+          <Route path="/parcours" element={<RouteProtegee><PageListeParcours /></RouteProtegee>} />
+          <Route path="/dashboard" element={<RouteProtegee><PageDashboard /></RouteProtegee>} />
+          <Route path="/moderation" element={<RouteProtegee><PageModerationAvis /></RouteProtegee>} />
+          <Route path="/utilisateurs" element={<RouteProtegee><PageUtilisateurs /></RouteProtegee>} />
+          <Route path="/carte" element={<RouteProtegee><PageCarteGenerale /></RouteProtegee>} />
+          <Route path="/parcours/nouveau" element={<RouteProtegee><PageFormulaireParcours /></RouteProtegee>} />
+          <Route path="/parcours/:id" element={<RouteProtegee><PageDetailParcours /></RouteProtegee>} />
+          <Route path="/parcours/:id/modifier" element={<RouteProtegee><PageFormulaireParcours /></RouteProtegee>} />
 
           <Route path="*" element={<Navigate to="/parcours" replace />} />
         </Routes>

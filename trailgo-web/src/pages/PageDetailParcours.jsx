@@ -9,6 +9,7 @@ import {
 } from '../api/parcoursApi';
 import { consulterTrace } from '../api/traceApi';
 import { useAuth } from '../context/AuthContext';
+import { urlAbsolueImage } from '../utils/images';
 import CarteTraceParcours from '../components/CarteTraceParcours';
 import './PageDetailParcours.css';
 
@@ -118,6 +119,14 @@ function PageDetailParcours() {
   return (
     <div className="page-detail-parcours">
       <Link to="/parcours" className="lien-retour">← Retour a la liste</Link>
+
+      {parcours.imageCouverture && (
+        <img
+          src={urlAbsolueImage(parcours.imageCouverture)}
+          alt={parcours.titre}
+          className="image-couverture-detail"
+        />
+      )}
 
       <header className="entete-detail">
         <div>

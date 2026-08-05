@@ -7,7 +7,9 @@ import {
   depublierParcours,
   supprimerParcours,
 } from '../api/parcoursApi';
+import { consulterTrace } from '../api/traceApi';
 import { useAuth } from '../context/AuthContext';
+import CarteTraceParcours from '../components/CarteTraceParcours';
 import './PageDetailParcours.css';
 
 const LIBELLES_THEME = {
@@ -29,6 +31,7 @@ function PageDetailParcours() {
   const { estAdmin } = useAuth();
 
   const [parcours, setParcours] = useState(null);
+  const [trace, setTrace] = useState(null);
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState(null);
   const [actionEnCours, setActionEnCours] = useState(false);
@@ -42,8 +45,16 @@ function PageDetailParcours() {
     setChargement(true);
     setErreur(null);
     try {
-      const resultat = await consulterParcours(id);
-      setParcours(resultat);
+      // Les deux appels partent en parallele : le trace n'existe pas
+      // toujours (404 gere par consulterTrace, qui renvoie null plutot
+      // que de lever une exception), donc il n'y a pas besoin d'attendre
+      // l'un avant l'autre.
+      const [resultatParcours, resultatTrace] = await Promise.all([
+        consulterParcours(id),
+        consulterTrace(id),
+      ]);
+      setParcours(resultatParcours);
+      setTrace(resultatTrace);
     } catch (erreurAppel) {
       if (erreurAppel.response?.status === 404) {
         setErreur('Ce parcours n\'existe pas ou a ete supprime.');
@@ -175,6 +186,12 @@ function PageDetailParcours() {
           </div>
         )}
       </div>
+
+      {parcours.etapes.length > 0 && (
+        <section className="section-carte">
+          <CarteTraceParcours etapes={parcours.etapes} trace={trace} />
+        </section>
+      )}
 
       <section className="section-etapes">
         <h2>Etapes du parcours</h2>

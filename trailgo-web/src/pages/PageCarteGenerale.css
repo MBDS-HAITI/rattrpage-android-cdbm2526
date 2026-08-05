@@ -1,0 +1,33 @@
+/* src/pages/PageCarteGenerale.css */
+
+.page-carte-generale {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.entete-carte-generale {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.2rem;
+}
+
+.entete-carte-generale h1 {
+  margin: 0 0 0.2rem;
+  font-size: 1.4rem;
+}
+
+.sous-titre {
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.conteneur-carte-generale {
+  height: 65vh;
+  min-height: 420px;
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}

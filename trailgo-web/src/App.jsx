@@ -7,6 +7,7 @@ import PageDetailParcours from './pages/PageDetailParcours';
 import PageFormulaireParcours from './pages/PageFormulaireParcours';
 import PageCarteGenerale from './pages/PageCarteGenerale';
 import PageDashboard from './pages/PageDashboard';
+import PageModerationAvis from './pages/PageModerationAvis';
 
 function RouteProtegee({ children }) {
   const { estConnecte, chargement } = useAuth();
@@ -41,6 +42,15 @@ function App() {
             element={
               <RouteProtegee>
                 <PageDashboard />
+              </RouteProtegee>
+            }
+          />
+
+          <Route
+            path="/moderation"
+            element={
+              <RouteProtegee>
+                <PageModerationAvis />
               </RouteProtegee>
             }
           />

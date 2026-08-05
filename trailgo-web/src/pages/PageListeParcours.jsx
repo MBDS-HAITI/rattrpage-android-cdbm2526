@@ -72,6 +72,9 @@ function PageListeParcours() {
       <header className="entete">
         <h1>Parcours touristiques</h1>
         <div className="info-utilisateur">
+          {estAdmin && (
+            <Link to="/dashboard" className="lien-carte">📊 Tableau de bord</Link>
+          )}
           <Link to="/carte" className="lien-carte">🗺️ Carte</Link>
           {estAdmin && (
             <Link to="/parcours/nouveau" className="bouton-nouveau-parcours">

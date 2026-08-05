@@ -6,6 +6,7 @@ import PageListeParcours from './pages/PageListeParcours';
 import PageDetailParcours from './pages/PageDetailParcours';
 import PageFormulaireParcours from './pages/PageFormulaireParcours';
 import PageCarteGenerale from './pages/PageCarteGenerale';
+import PageDashboard from './pages/PageDashboard';
 
 function RouteProtegee({ children }) {
   const { estConnecte, chargement } = useAuth();
@@ -31,6 +32,15 @@ function App() {
             element={
               <RouteProtegee>
                 <PageListeParcours />
+              </RouteProtegee>
+            }
+          />
+
+          <Route
+            path="/dashboard"
+            element={
+              <RouteProtegee>
+                <PageDashboard />
               </RouteProtegee>
             }
           />

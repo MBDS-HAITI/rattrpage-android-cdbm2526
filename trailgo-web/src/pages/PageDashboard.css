@@ -1,0 +1,104 @@
+/* src/pages/PageDashboard.css */
+
+.page-dashboard {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.entete-dashboard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.entete-dashboard h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.grille-statistiques {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.carte-statistique {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.valeur-statistique {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.label-statistique {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 0.3rem;
+}
+
+.carte-statistique-publie .valeur-statistique {
+  color: #166534;
+}
+
+.carte-statistique-brouillon .valeur-statistique {
+  color: #854d0e;
+}
+
+.section-top h2 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.tableau-top {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tableau-top th {
+  text-align: left;
+  padding: 0.7rem 1rem;
+  background: #f9fafb;
+  font-size: 0.8rem;
+  color: #6b7280;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tableau-top td {
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 0.9rem;
+}
+
+.tableau-top tr:last-child td {
+  border-bottom: none;
+}
+
+.tableau-top a {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.tableau-top a:hover {
+  text-decoration: underline;
+}
+
+.cellule-rang {
+  font-weight: 700;
+  color: #9ca3af;
+}

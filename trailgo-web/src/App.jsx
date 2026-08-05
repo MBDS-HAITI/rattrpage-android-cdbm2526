@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import PageConnexion from './pages/PageConnexion';
 import PageListeParcours from './pages/PageListeParcours';
+import PageDetailParcours from './pages/PageDetailParcours';
 
 function RouteProtegee({ children }) {
   const { estConnecte, chargement } = useAuth();
@@ -28,6 +29,15 @@ function App() {
             element={
               <RouteProtegee>
                 <PageListeParcours />
+              </RouteProtegee>
+            }
+          />
+
+          <Route
+            path="/parcours/:id"
+            element={
+              <RouteProtegee>
+                <PageDetailParcours />
               </RouteProtegee>
             }
           />

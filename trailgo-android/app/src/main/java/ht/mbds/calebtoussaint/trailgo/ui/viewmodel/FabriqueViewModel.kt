@@ -63,4 +63,13 @@ object FabriqueViewModel {
             }
         }
     }
+
+    fun creerFabriqueDetailParcours(context: Context): ViewModelProvider.Factory {
+        return object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+                return DetailParcoursViewModel(obtenirRepositoryParcours(context)) as T
+            }
+        }
+    }
 }

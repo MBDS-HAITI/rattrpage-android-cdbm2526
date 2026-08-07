@@ -5,18 +5,18 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import ht.mbds.calebtoussaint.trailgo.navigation.Routes
 import ht.mbds.calebtoussaint.trailgo.ui.screens.EcranConnexion
+import ht.mbds.calebtoussaint.trailgo.ui.screens.EcranDetailParcours
 import ht.mbds.calebtoussaint.trailgo.ui.screens.EcranListeParcours
 import ht.mbds.calebtoussaint.trailgo.ui.theme.TrailGoTheme
 
@@ -76,17 +76,25 @@ fun ApplicationTrailGo() {
             )
         }
 
-        composable(Routes.DETAIL_PARCOURS) { backStackEntry ->
-            val parcoursId = backStackEntry.arguments
-                ?.getString("parcoursId")
-                ?.toLongOrNull()
+        composable(
+            route = Routes.DETAIL_PARCOURS,
+            // Argument type explicitement : la navigation refuse la
+            // destination si l'identifiant n'est pas un nombre valide,
+            // plutot que de laisser passer une valeur nulle jusqu'au
+            // ViewModel.
+            arguments = listOf(
+                navArgument("parcoursId") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val parcoursId = backStackEntry.arguments?.getLong("parcoursId") ?: return@composable
 
-            // Ecran temporaire : la vraie fiche detail arrive a l'etape
-            // suivante. On confirme ici seulement que l'identifiant du
-            // parcours clique est correctement transmis.
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Detail du parcours n°$parcoursId (a construire)")
-            }
+            EcranDetailParcours(
+                idParcours = parcoursId,
+                // popBackStack retire l'ecran courant de la pile et
+                // revient a la liste : meme comportement que le bouton
+                // "retour" systeme, pour eviter deux logiques divergentes.
+                surRetour = { controleurNavigation.popBackStack() }
+            )
         }
     }
 }

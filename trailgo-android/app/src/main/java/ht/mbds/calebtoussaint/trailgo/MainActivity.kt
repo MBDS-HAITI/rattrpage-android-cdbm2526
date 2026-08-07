@@ -14,60 +14,50 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import ht.mbds.calebtoussaint.trailgo.data.api.GestionnaireJeton
 import ht.mbds.calebtoussaint.trailgo.navigation.Routes
 import ht.mbds.calebtoussaint.trailgo.ui.screens.EcranCarteParcours
 import ht.mbds.calebtoussaint.trailgo.ui.screens.EcranConnexion
 import ht.mbds.calebtoussaint.trailgo.ui.screens.EcranDetailParcours
+import ht.mbds.calebtoussaint.trailgo.ui.screens.EcranFavoris
 import ht.mbds.calebtoussaint.trailgo.ui.screens.EcranListeParcours
 import ht.mbds.calebtoussaint.trailgo.ui.theme.TrailGoTheme
 import org.osmdroid.config.Configuration
 import java.io.File
 
-/**
- * Point d'entree de l'application.
- *
- * Desormais tres court : elle se contente d'installer le systeme de
- * navigation. Chaque ecran est un composant independant, comme les
- * pages de src/pages/ cote React.
- */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Configuration Osmdroid : obligatoire avant tout affichage de
-        // carte. Sans un userAgentValue distinct du defaut, les
-        // serveurs de tuiles OpenStreetMap refusent les requetes.
-        // Le cache est place dans le repertoire prive de l'app, ce qui
-        // evite toute demande de permission de stockage.
         Configuration.getInstance().apply {
             userAgentValue = packageName
             osmdroidBasePath = File(cacheDir, "osmdroid")
             osmdroidTileCache = File(osmdroidBasePath, "tiles")
         }
 
+        val dejaConnecte = GestionnaireJeton(applicationContext).estConnecte()
+        val destinationDepart = if (dejaConnecte) {
+            Routes.LISTE_PARCOURS
+        } else {
+            Routes.CONNEXION
+        }
+
         enableEdgeToEdge()
         setContent {
             TrailGoTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { _ ->
-                    ApplicationTrailGo()
-                }
+                ApplicationTrailGo(destinationDepart = destinationDepart)
             }
         }
+        }
     }
-}
 
-/**
- * NavHost : le conteneur qui affiche l'ecran correspondant a la route
- * active, avec gestion automatique de l'historique (bouton "retour"
- * systeme). Equivalent de <Routes> + <Route> de React Router.
- */
 @Composable
-fun ApplicationTrailGo() {
+fun ApplicationTrailGo(destinationDepart: String) {
     val controleurNavigation = rememberNavController()
 
     NavHost(
         navController = controleurNavigation,
-        startDestination = Routes.CONNEXION
+        startDestination = destinationDepart
     ) {
         composable(Routes.CONNEXION) {
             EcranConnexion(
@@ -81,6 +71,18 @@ fun ApplicationTrailGo() {
 
         composable(Routes.LISTE_PARCOURS) {
             EcranListeParcours(
+                surParcoursClique = { id ->
+                    controleurNavigation.navigate(Routes.detailParcours(id))
+                },
+                surVoirFavoris = {
+                    controleurNavigation.navigate(Routes.FAVORIS)
+                }
+            )
+        }
+
+        composable(Routes.FAVORIS) {
+            EcranFavoris(
+                surRetour = { controleurNavigation.popBackStack() },
                 surParcoursClique = { id ->
                     controleurNavigation.navigate(Routes.detailParcours(id))
                 }

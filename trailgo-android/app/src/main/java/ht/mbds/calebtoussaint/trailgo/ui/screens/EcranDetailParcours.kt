@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -64,6 +66,28 @@ fun EcranDetailParcours(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Retour"
                             )
+                        }
+                    },
+                    actions = {
+                        if (etat.parcours != null) {
+                            IconButton(
+                                onClick = viewModel::togglerFavori,
+                                enabled = !etat.chargementFavori
+                            ) {
+                                Icon(
+                                    imageVector = if (etat.estFavori) {
+                                        Icons.Filled.Favorite
+                                    } else {
+                                        Icons.Filled.FavoriteBorder
+                                    },
+                                    contentDescription = if (etat.estFavori) {
+                                        "Retirer des favoris"
+                                    } else {
+                                        "Ajouter aux favoris"
+                                    },
+                                    tint = if (etat.estFavori) Color.Red else LocalContentColor.current
+                                )
+                            }
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(

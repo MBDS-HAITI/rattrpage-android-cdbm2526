@@ -6,6 +6,7 @@ object Routes {
     const val LISTE_PARCOURS = "liste_parcours"
     const val DETAIL_PARCOURS = "detail_parcours/{parcoursId}"
     const val CARTE_PARCOURS = "carte_parcours/{parcoursId}"
+    const val FAVORIS = "favoris"
 
     fun detailParcours(id: Long) = "detail_parcours/$id"
     fun carteParcours(id: Long) = "carte_parcours/$id"

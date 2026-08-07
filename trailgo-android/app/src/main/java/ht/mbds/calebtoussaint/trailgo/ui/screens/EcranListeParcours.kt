@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,7 +28,8 @@ private val THEMES = listOf("CULTUREL", "GASTRONOMIQUE", "NATUREL", "HISTORIQUE"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EcranListeParcours(
-    surParcoursClique: (Long) -> Unit
+    surParcoursClique: (Long) -> Unit,
+    surVoirFavoris: () -> Unit
 ) {
     val contexte = LocalContext.current
     val viewModel: ListeParcoursViewModel = viewModel(
@@ -36,17 +39,21 @@ fun EcranListeParcours(
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // Meme fond decoratif que l'ecran de connexion, pour une
-        // identite visuelle coherente dans toute l'application.
         ArrierePlanTraces()
 
         Scaffold(
-            // Fond transparent : sans cela le Scaffold peint sa propre
-            // couleur opaque et masque completement le decor.
             containerColor = Color.Transparent,
             topBar = {
                 TopAppBar(
                     title = { Text("Parcours touristiques") },
+                    actions = {
+                        IconButton(onClick = surVoirFavoris) {
+                            Icon(
+                                imageVector = Icons.Filled.Favorite,
+                                contentDescription = "Mes favoris"
+                            )
+                        }
+                    },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Transparent
                     )
@@ -134,7 +141,6 @@ private fun CarteParcours(
     Card(
         onClick = onClic,
         modifier = Modifier.fillMaxWidth(),
-        // Cartes blanches opaques pour rester lisibles par-dessus le decor.
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {

@@ -25,7 +25,7 @@ import retrofit2.converter.gson.GsonConverterFactory
  */
 object ApiClient {
 
-    private const val URL_BASE = "http://192.168.1.131:8081/"
+    private const val URL_BASE = "http://192.168.0.87:8081/"
 
     /**
      * L'API renvoie des chemins RELATIFS pour les images

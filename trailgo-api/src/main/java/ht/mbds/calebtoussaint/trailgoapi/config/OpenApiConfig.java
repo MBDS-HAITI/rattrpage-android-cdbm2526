@@ -53,7 +53,7 @@ public class OpenApiConfig {
                         .contact(new Contact().name("Caleb Toussaint"))
                         .license(new License().name("Projet pedagogique MBDS")))
                 .servers(List.of(new Server()
-                        .url("http://localhost:8080")
+                        .url("http://localhost:8081")
                         .description("Environnement de developpement")))
                 .components(new Components().addSecuritySchemes(SCHEMA_JWT,
                         new SecurityScheme()

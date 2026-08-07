@@ -5,6 +5,7 @@ import ht.mbds.calebtoussaint.trailgo.data.api.ParcoursApiService
 import ht.mbds.calebtoussaint.trailgo.data.model.PageResponse
 import ht.mbds.calebtoussaint.trailgo.data.model.ParcoursResponse
 import ht.mbds.calebtoussaint.trailgo.data.model.ParcoursSummaryResponse
+import ht.mbds.calebtoussaint.trailgo.data.model.TraceResponse
 
 class ParcoursRepository(
     private val parcoursApi: ParcoursApiService
@@ -34,6 +35,14 @@ class ParcoursRepository(
     suspend fun consulter(id: Long): Result<ParcoursResponse> {
         return try {
             Result.success(parcoursApi.consulter(id))
+        } catch (exception: Exception) {
+            Result.failure(exception)
+        }
+    }
+
+    suspend fun consulterTrace(id: Long): Result<TraceResponse> {
+        return try {
+            Result.success(parcoursApi.consulterTrace(id))
         } catch (exception: Exception) {
             Result.failure(exception)
         }

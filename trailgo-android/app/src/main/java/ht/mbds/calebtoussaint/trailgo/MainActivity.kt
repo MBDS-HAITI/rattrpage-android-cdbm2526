@@ -15,10 +15,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import ht.mbds.calebtoussaint.trailgo.navigation.Routes
+import ht.mbds.calebtoussaint.trailgo.ui.screens.EcranCarteParcours
 import ht.mbds.calebtoussaint.trailgo.ui.screens.EcranConnexion
 import ht.mbds.calebtoussaint.trailgo.ui.screens.EcranDetailParcours
 import ht.mbds.calebtoussaint.trailgo.ui.screens.EcranListeParcours
 import ht.mbds.calebtoussaint.trailgo.ui.theme.TrailGoTheme
+import org.osmdroid.config.Configuration
+import java.io.File
 
 /**
  * Point d'entree de l'application.
@@ -30,6 +33,18 @@ import ht.mbds.calebtoussaint.trailgo.ui.theme.TrailGoTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Configuration Osmdroid : obligatoire avant tout affichage de
+        // carte. Sans un userAgentValue distinct du defaut, les
+        // serveurs de tuiles OpenStreetMap refusent les requetes.
+        // Le cache est place dans le repertoire prive de l'app, ce qui
+        // evite toute demande de permission de stockage.
+        Configuration.getInstance().apply {
+            userAgentValue = packageName
+            osmdroidBasePath = File(cacheDir, "osmdroid")
+            osmdroidTileCache = File(osmdroidBasePath, "tiles")
+        }
+
         enableEdgeToEdge()
         setContent {
             TrailGoTheme {
@@ -57,10 +72,6 @@ fun ApplicationTrailGo() {
         composable(Routes.CONNEXION) {
             EcranConnexion(
                 surConnexionReussie = {
-                    // popUpTo + inclusive : retire l'ecran de connexion
-                    // de l'historique. Sans cela, le bouton "retour"
-                    // ramenerait l'utilisateur connecte vers l'ecran de
-                    // connexion, ce qui n'a pas de sens.
                     controleurNavigation.navigate(Routes.LISTE_PARCOURS) {
                         popUpTo(Routes.CONNEXION) { inclusive = true }
                     }
@@ -78,10 +89,6 @@ fun ApplicationTrailGo() {
 
         composable(
             route = Routes.DETAIL_PARCOURS,
-            // Argument type explicitement : la navigation refuse la
-            // destination si l'identifiant n'est pas un nombre valide,
-            // plutot que de laisser passer une valeur nulle jusqu'au
-            // ViewModel.
             arguments = listOf(
                 navArgument("parcoursId") { type = NavType.LongType }
             )
@@ -90,9 +97,21 @@ fun ApplicationTrailGo() {
 
             EcranDetailParcours(
                 idParcours = parcoursId,
-                // popBackStack retire l'ecran courant de la pile et
-                // revient a la liste : meme comportement que le bouton
-                // "retour" systeme, pour eviter deux logiques divergentes.
+                surRetour = { controleurNavigation.popBackStack() },
+                surVoirCarte = { controleurNavigation.navigate(Routes.carteParcours(parcoursId)) }
+            )
+        }
+
+        composable(
+            route = Routes.CARTE_PARCOURS,
+            arguments = listOf(
+                navArgument("parcoursId") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val parcoursId = backStackEntry.arguments?.getLong("parcoursId") ?: return@composable
+
+            EcranCarteParcours(
+                idParcours = parcoursId,
                 surRetour = { controleurNavigation.popBackStack() }
             )
         }

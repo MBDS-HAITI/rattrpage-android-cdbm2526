@@ -31,7 +31,8 @@ import ht.mbds.calebtoussaint.trailgo.ui.viewmodel.FabriqueViewModel
 @Composable
 fun EcranDetailParcours(
     idParcours: Long,
-    surRetour: () -> Unit
+    surRetour: () -> Unit,
+    surVoirCarte: () -> Unit
 ) {
     val contexte = LocalContext.current
     val viewModel: DetailParcoursViewModel = viewModel(
@@ -39,9 +40,6 @@ fun EcranDetailParcours(
     )
     val etat by viewModel.etat.collectAsState()
 
-    // Declenche le chargement une seule fois, et le relance uniquement
-    // si l'identifiant change. C'est l'equivalent Compose du "init {}"
-    // utilise dans ListeParcoursViewModel.
     LaunchedEffect(idParcours) {
         viewModel.charger(idParcours)
     }
@@ -103,7 +101,7 @@ fun EcranDetailParcours(
                     }
 
                     etat.parcours != null -> {
-                        ContenuDetail(parcours = etat.parcours!!)
+                        ContenuDetail(parcours = etat.parcours!!, surVoirCarte = surVoirCarte)
                     }
                 }
             }
@@ -112,7 +110,7 @@ fun EcranDetailParcours(
 }
 
 @Composable
-private fun ContenuDetail(parcours: ParcoursResponse) {
+private fun ContenuDetail(parcours: ParcoursResponse, surVoirCarte: () -> Unit) {
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -123,6 +121,15 @@ private fun ContenuDetail(parcours: ParcoursResponse) {
 
         item {
             CarteStatistiques(parcours)
+        }
+
+        item {
+            Button(
+                onClick = surVoirCarte,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Voir la carte du parcours")
+            }
         }
 
         item {
@@ -141,8 +148,6 @@ private fun ContenuDetail(parcours: ParcoursResponse) {
                 )
             }
         } else {
-            // Les etapes sont triees par "ordre" cote client : on ne
-            // depend pas de l'ordre de serialisation renvoye par l'API.
             items(parcours.etapes.sortedBy { it.ordre }, key = { it.id }) { etape ->
                 CarteEtape(etape)
             }
@@ -162,8 +167,6 @@ private fun CarteEnTete(parcours: ParcoursResponse) {
                 AsyncImage(
                     model = ApiClient.urlAbsolueImage(parcours.imageCouverture),
                     contentDescription = parcours.titre,
-                    // Crop evite la deformation quand le ratio de l'image
-                    // ne correspond pas a celui du cadre.
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -264,8 +267,6 @@ private fun CarteEtape(etape: EtapeResponse) {
     ) {
         Row(modifier = Modifier.padding(16.dp)) {
 
-            // Pastille numerotee, reprise visuelle des marqueurs de la
-            // carte Leaflet du back office.
             Box(
                 modifier = Modifier
                     .size(32.dp)
@@ -325,10 +326,6 @@ private fun CarteEtape(etape: EtapeResponse) {
     }
 }
 
-/**
- * 95 minutes -> "1 h 35". Plus lisible qu'un nombre de minutes brut
- * des que la duree depasse l'heure.
- */
 private fun formaterDuree(minutes: Int?): String {
     if (minutes == null) return "-"
     if (minutes < 60) return "$minutes min"

@@ -72,4 +72,12 @@ object FabriqueViewModel {
             }
         }
     }
+    fun creerFabriqueCarteParcours(context: Context): ViewModelProvider.Factory {
+        return object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+                return CarteParcoursViewModel(obtenirRepositoryParcours(context)) as T
+            }
+        }
+    }
 }

@@ -79,9 +79,8 @@ dependencies {
     // ---- Navigation entre les ecrans ----
     implementation(libs.navigation.compose)
 
-    // ---- Cartographie ----
-    implementation(libs.maps.compose)
-    implementation(libs.play.services.maps)
+    // ---- Cartographie : OSMDroid (OpenStreetMap), sans cle ni compte ----
+    implementation(libs.osmdroid)
     implementation(libs.play.services.location)
 
     // ---- Stockage securise du jeton JWT ----

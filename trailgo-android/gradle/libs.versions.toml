@@ -25,8 +25,7 @@ okhttp = "4.12.0"
 room = "2.6.1"
 navigationCompose = "2.8.0"
 coroutines = "1.8.1"
-mapsCompose = "4.3.3"
-playServicesMaps = "19.0.0"
+osmdroid = "6.1.20"
 playServicesLocation = "21.3.0"
 securityCrypto = "1.1.0-alpha06"
 workManager = "2.9.1"
@@ -66,8 +65,11 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 
 # ---- Cartographie ----
-maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "mapsCompose" }
-play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
+# OSMDroid plutot que Google Maps SDK : compte de facturation Google
+# inaccessible (carte refusee). OSMDroid affiche des tuiles
+# OpenStreetMap sans cle ni compte, et reprend le meme fond de carte
+# que Leaflet cote back office React.
+osmdroid = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 
 # ---- Stockage securise du jeton JWT ----

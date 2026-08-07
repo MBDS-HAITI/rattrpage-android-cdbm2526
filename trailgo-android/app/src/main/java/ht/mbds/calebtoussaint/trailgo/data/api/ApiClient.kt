@@ -25,7 +25,20 @@ import retrofit2.converter.gson.GsonConverterFactory
  */
 object ApiClient {
 
-    private const val URL_BASE = "http://192.168.1.131:8080/"
+    private const val URL_BASE = "http://192.168.1.131:8081/"
+
+    /**
+     * L'API renvoie des chemins RELATIFS pour les images
+     * ("/uploads/xxx.jpg"), valides uniquement combines a l'adresse du
+     * serveur. Sans ce prefixe, Coil cherche l'image a une adresse
+     * inexistante et n'affiche rien. Meme piege que cote React,
+     * corrige de la meme maniere.
+     */
+    fun urlAbsolueImage(cheminRelatif: String?): String? {
+        if (cheminRelatif.isNullOrBlank()) return null
+        if (cheminRelatif.startsWith("http")) return cheminRelatif
+        return URL_BASE.trimEnd('/') + cheminRelatif
+    }
 
     /**
      * Intercepteur : ajoute automatiquement le jeton JWT a chaque

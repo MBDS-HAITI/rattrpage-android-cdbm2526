@@ -10,16 +10,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import ht.mbds.calebtoussaint.trailgo.data.api.ApiClient
 import ht.mbds.calebtoussaint.trailgo.data.model.ParcoursSummaryResponse
+import ht.mbds.calebtoussaint.trailgo.ui.components.ArrierePlanTraces
 import ht.mbds.calebtoussaint.trailgo.ui.viewmodel.FabriqueViewModel
 import ht.mbds.calebtoussaint.trailgo.ui.viewmodel.ListeParcoursViewModel
 
 private val THEMES = listOf("CULTUREL", "GASTRONOMIQUE", "NATUREL", "HISTORIQUE")
-private val DIFFICULTES = listOf("FACILE", "MOYEN", "DIFFICILE")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,80 +34,90 @@ fun EcranListeParcours(
     )
     val etat by viewModel.etat.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Parcours touristiques") })
-        }
-    ) { paddingInterieur ->
-        Column(modifier = Modifier.padding(paddingInterieur)) {
+    Box(modifier = Modifier.fillMaxSize()) {
 
-            OutlinedTextField(
-                value = etat.recherche,
-                onValueChange = viewModel::changerRecherche,
-                label = { Text("Rechercher un parcours") },
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            )
+        // Meme fond decoratif que l'ecran de connexion, pour une
+        // identite visuelle coherente dans toute l'application.
+        ArrierePlanTraces()
 
-            // Rangee de filtres, defilable horizontalement : pratique
-            // sur un ecran de telephone plus etroit qu'un ecran web.
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                THEMES.forEach { theme ->
-                    FilterChip(
-                        selected = etat.filtreTheme == theme,
-                        onClick = {
-                            viewModel.changerFiltreTheme(
-                                if (etat.filtreTheme == theme) null else theme
-                            )
-                        },
-                        label = { Text(theme) }
+        Scaffold(
+            // Fond transparent : sans cela le Scaffold peint sa propre
+            // couleur opaque et masque completement le decor.
+            containerColor = Color.Transparent,
+            topBar = {
+                TopAppBar(
+                    title = { Text("Parcours touristiques") },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent
                     )
-                }
+                )
             }
+        ) { paddingInterieur ->
+            Column(modifier = Modifier.padding(paddingInterieur)) {
 
-            Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = etat.recherche,
+                    onValueChange = viewModel::changerRecherche,
+                    label = { Text("Rechercher un parcours") },
+                    singleLine = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                )
 
-            when {
-                etat.chargement -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    THEMES.forEach { theme ->
+                        FilterChip(
+                            selected = etat.filtreTheme == theme,
+                            onClick = {
+                                viewModel.changerFiltreTheme(
+                                    if (etat.filtreTheme == theme) null else theme
+                                )
+                            },
+                            label = { Text(theme) }
+                        )
                     }
                 }
-                etat.erreur != null -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(etat.erreur!!, color = MaterialTheme.colorScheme.error)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Button(onClick = viewModel::charger) { Text("Reessayer") }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                when {
+                    etat.chargement -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator()
                         }
                     }
-                }
-                etat.parcours.isEmpty() -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Aucun parcours ne correspond a ces criteres.")
+                    etat.erreur != null -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(etat.erreur!!, color = MaterialTheme.colorScheme.error)
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Button(onClick = viewModel::charger) { Text("Reessayer") }
+                            }
+                        }
                     }
-                }
-                else -> {
-                    // LazyColumn : version Compose d'une liste
-                    // defilante optimisee (l'equivalent de RecyclerView),
-                    // qui ne dessine que les elements visibles a l'ecran.
-                    LazyColumn(
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(etat.parcours, key = { it.id }) { parcours ->
-                            CarteParcours(
-                                parcours = parcours,
-                                onClic = { surParcoursClique(parcours.id) }
-                            )
+                    etat.parcours.isEmpty() -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("Aucun parcours ne correspond a ces criteres.")
+                        }
+                    }
+                    else -> {
+                        LazyColumn(
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(etat.parcours, key = { it.id }) { parcours ->
+                                CarteParcours(
+                                    parcours = parcours,
+                                    onClic = { surParcoursClique(parcours.id) }
+                                )
+                            }
                         }
                     }
                 }
@@ -121,15 +133,15 @@ private fun CarteParcours(
 ) {
     Card(
         onClick = onClic,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        // Cartes blanches opaques pour rester lisibles par-dessus le decor.
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column {
             if (parcours.imageCouverture != null) {
-                // AsyncImage (Coil) : charge une image depuis une URL,
-                // gere automatiquement le cache et l'affichage progressif.
-                // Equivalent Android de <img src="..."> cote React.
                 AsyncImage(
-                    model = parcours.imageCouverture,
+                    model = ApiClient.urlAbsolueImage(parcours.imageCouverture),
                     contentDescription = parcours.titre,
                     modifier = Modifier
                         .fillMaxWidth()

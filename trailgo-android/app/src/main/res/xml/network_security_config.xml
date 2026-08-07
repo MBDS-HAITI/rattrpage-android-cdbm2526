@@ -1,4 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- res/xml/network_security_config.xml
+
+     Autorise le trafic HTTP non chiffre, UNIQUEMENT vers l'adresse de
+     developpement. Android bloque ce trafic par defaut depuis l'API 28,
+     par securite : sans ce fichier, chaque appel a l'API echouerait
+     silencieusement avec une erreur "CLEARTEXT communication not permitted".
+
+     A ADAPTER : remplace l'adresse IP par celle de ton ordinateur,
+     la meme que dans ApiClient.kt.
+
+     En production, l'API tournerait derriere HTTPS et ce fichier ne
+     serait plus necessaire. -->
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="false">192.168.1.131</domain>

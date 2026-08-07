@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ht.mbds.calebtoussaint.trailgo.data.model.EtapeResponse
 import ht.mbds.calebtoussaint.trailgo.data.repository.ParcoursRepository
+import ht.mbds.calebtoussaint.trailgo.util.Haversine
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,13 +14,27 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
 
+/** Distance sous laquelle une etape est consideree comme atteinte. */
+private const val SEUIL_ARRIVEE_METRES = 30.0
+
 data class EtatCarteParcours(
     val titre: String = "",
     val etapes: List<EtapeResponse> = emptyList(),
     val trace: List<GeoPoint> = emptyList(),
     val chargement: Boolean = true,
-    val erreur: String? = null
-)
+    val erreur: String? = null,
+
+    // ---- Navigation terrain ----
+    val modeNavigation: Boolean = false,
+    val positionUtilisateur: GeoPoint? = null,
+    val etapesAtteintes: Set<Long> = emptySet(),
+    val distanceProchaineEtapeM: Double? = null,
+    val capProchaineEtapeDeg: Double? = null
+) {
+    /** Prochaine etape non encore atteinte, ou null si tout est fait. */
+    val prochaineEtape: EtapeResponse?
+        get() = etapes.firstOrNull { it.id !in etapesAtteintes }
+}
 
 class CarteParcoursViewModel(
     private val parcoursRepository: ParcoursRepository
@@ -37,9 +52,6 @@ class CarteParcoursViewModel(
         viewModelScope.launch {
             _etat.update { it.copy(chargement = true, erreur = null) }
 
-            // Le detail (pour les etapes) et le trace sont deux appels
-            // independants : on les lance en parallele plutot que l'un
-            // apres l'autre, pour reduire le temps de chargement.
             coroutineScope {
                 val resultatDetail = async { parcoursRepository.consulter(id) }
                 val resultatTrace = async { parcoursRepository.consulterTrace(id) }
@@ -47,9 +59,6 @@ class CarteParcoursViewModel(
                 val detail = resultatDetail.await()
                 val trace = resultatTrace.await()
 
-                // Le detail est indispensable (etapes, titre). Le trace est
-                // optionnel : un parcours peut ne pas encore avoir de trace
-                // importee, auquel cas la carte affiche les marqueurs seuls.
                 if (detail.isFailure) {
                     _etat.update {
                         it.copy(
@@ -62,7 +71,6 @@ class CarteParcoursViewModel(
 
                 val parcours = detail.getOrThrow()
                 val points = trace.getOrNull()?.geometrie?.coordinates?.map { paire ->
-                    // GeoJSON : [longitude, latitude], inverse de GeoPoint(lat, lng).
                     GeoPoint(paire[1], paire[0])
                 } ?: emptyList()
 
@@ -82,5 +90,60 @@ class CarteParcoursViewModel(
         val id = idCourant ?: return
         idCourant = null
         charger(id)
+    }
+
+    // ---- Navigation terrain ----
+
+    fun demarrerNavigation() {
+        _etat.update { it.copy(modeNavigation = true) }
+    }
+
+    fun arreterNavigation() {
+        _etat.update {
+            it.copy(
+                modeNavigation = false,
+                positionUtilisateur = null,
+                distanceProchaineEtapeM = null,
+                capProchaineEtapeDeg = null
+            )
+        }
+    }
+
+    /**
+     * Appelee a chaque nouvelle position GPS recue. Met a jour la
+     * distance et le cap vers la prochaine etape non atteinte, et la
+     * marque comme atteinte si l'utilisateur entre dans le rayon de
+     * detection (Haversine local).
+     */
+    fun mettreAJourPosition(latitude: Double, longitude: Double) {
+        val etatActuel = _etat.value
+        val prochaine = etatActuel.prochaineEtape
+
+        if (prochaine == null) {
+            _etat.update { it.copy(positionUtilisateur = GeoPoint(latitude, longitude)) }
+            return
+        }
+
+        val distance = Haversine.distanceMetres(
+            latitude, longitude, prochaine.latitude, prochaine.longitude
+        )
+        val cap = Haversine.capDegres(
+            latitude, longitude, prochaine.latitude, prochaine.longitude
+        )
+
+        val nouvellesAtteintes = if (distance <= SEUIL_ARRIVEE_METRES) {
+            etatActuel.etapesAtteintes + prochaine.id
+        } else {
+            etatActuel.etapesAtteintes
+        }
+
+        _etat.update {
+            it.copy(
+                positionUtilisateur = GeoPoint(latitude, longitude),
+                distanceProchaineEtapeM = distance,
+                capProchaineEtapeDeg = cap,
+                etapesAtteintes = nouvellesAtteintes
+            )
+        }
     }
 }

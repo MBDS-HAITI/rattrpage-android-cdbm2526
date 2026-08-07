@@ -2,6 +2,7 @@
 package ht.mbds.calebtoussaint.trailgo.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,13 +21,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import ht.mbds.calebtoussaint.trailgo.data.api.ApiClient
+import ht.mbds.calebtoussaint.trailgo.data.model.AvisResponse
 import ht.mbds.calebtoussaint.trailgo.data.model.EtapeResponse
 import ht.mbds.calebtoussaint.trailgo.data.model.ParcoursResponse
 import ht.mbds.calebtoussaint.trailgo.ui.components.ArrierePlanTraces
+import ht.mbds.calebtoussaint.trailgo.ui.viewmodel.AvisViewModel
 import ht.mbds.calebtoussaint.trailgo.ui.viewmodel.DetailParcoursViewModel
+import ht.mbds.calebtoussaint.trailgo.ui.viewmodel.EtatAvis
 import ht.mbds.calebtoussaint.trailgo.ui.viewmodel.FabriqueViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,13 +42,20 @@ fun EcranDetailParcours(
     surVoirCarte: () -> Unit
 ) {
     val contexte = LocalContext.current
+
     val viewModel: DetailParcoursViewModel = viewModel(
         factory = FabriqueViewModel.creerFabriqueDetailParcours(contexte)
     )
     val etat by viewModel.etat.collectAsState()
 
+    val avisViewModel: AvisViewModel = viewModel(
+        factory = FabriqueViewModel.creerFabriqueAvis(contexte)
+    )
+    val etatAvis by avisViewModel.etat.collectAsState()
+
     LaunchedEffect(idParcours) {
         viewModel.charger(idParcours)
+        avisViewModel.charger(idParcours)
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -125,7 +137,22 @@ fun EcranDetailParcours(
                     }
 
                     etat.parcours != null -> {
-                        ContenuDetail(parcours = etat.parcours!!, surVoirCarte = surVoirCarte)
+                        ContenuDetail(
+                            parcours = etat.parcours!!,
+                            surVoirCarte = surVoirCarte,
+                            etatAvis = etatAvis,
+                            surOuvrirFormulaireAvis = avisViewModel::ouvrirFormulaire
+                        )
+
+                        if (etatAvis.formulaireOuvert) {
+                            DialogueDepotAvis(
+                                etatAvis = etatAvis,
+                                surFermer = avisViewModel::fermerFormulaire,
+                                surModifierNote = avisViewModel::modifierNoteSaisie,
+                                surModifierCommentaire = avisViewModel::modifierCommentaireSaisi,
+                                surSoumettre = avisViewModel::soumettre
+                            )
+                        }
                     }
                 }
             }
@@ -134,7 +161,12 @@ fun EcranDetailParcours(
 }
 
 @Composable
-private fun ContenuDetail(parcours: ParcoursResponse, surVoirCarte: () -> Unit) {
+private fun ContenuDetail(
+    parcours: ParcoursResponse,
+    surVoirCarte: () -> Unit,
+    etatAvis: EtatAvis,
+    surOuvrirFormulaireAvis: () -> Unit
+) {
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -174,6 +206,37 @@ private fun ContenuDetail(parcours: ParcoursResponse, surVoirCarte: () -> Unit) 
         } else {
             items(parcours.etapes.sortedBy { it.ordre }, key = { it.id }) { etape ->
                 CarteEtape(etape)
+            }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Avis (${etatAvis.avis.size})",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                TextButton(onClick = surOuvrirFormulaireAvis) {
+                    Text("Deposer un avis")
+                }
+            }
+        }
+
+        if (etatAvis.avis.isEmpty()) {
+            item {
+                Text(
+                    "Aucun avis pour le moment. Soyez le premier a en deposer un.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        } else {
+            items(etatAvis.avis, key = { it.id }) { avis ->
+                CarteAvis(avis)
             }
         }
     }
@@ -348,6 +411,119 @@ private fun CarteEtape(etape: EtapeResponse) {
             }
         }
     }
+}
+
+@Composable
+private fun CarteAvis(avis: AvisResponse) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(avis.auteurNom, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                Text(
+                    // Les 10 premiers caracteres d'une date ISO donnent
+                    // directement AAAA-MM-JJ, sans avoir besoin d'une
+                    // bibliotheque de formatage de dates.
+                    avis.dateCreation.take(10),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            EtoilesLectureSeule(note = avis.note)
+
+            if (!avis.commentaire.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(avis.commentaire, style = MaterialTheme.typography.bodyMedium)
+            }
+        }
+    }
+}
+
+@Composable
+private fun EtoilesLectureSeule(note: Int) {
+    Row {
+        for (i in 1..5) {
+            Text(
+                text = if (i <= note) "★" else "☆",
+                fontSize = 16.sp,
+                color = if (i <= note) Color(0xFFFFA000) else Color.Gray
+            )
+        }
+    }
+}
+
+@Composable
+private fun DialogueDepotAvis(
+    etatAvis: EtatAvis,
+    surFermer: () -> Unit,
+    surModifierNote: (Int) -> Unit,
+    surModifierCommentaire: (String) -> Unit,
+    surSoumettre: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = { if (!etatAvis.envoiEnCours) surFermer() },
+        title = { Text("Deposer un avis") },
+        text = {
+            Column {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                    for (i in 1..5) {
+                        Text(
+                            text = if (i <= etatAvis.noteSaisie) "★" else "☆",
+                            fontSize = 32.sp,
+                            color = if (i <= etatAvis.noteSaisie) Color(0xFFFFA000) else Color.Gray,
+                            modifier = Modifier
+                                .clickable(enabled = !etatAvis.envoiEnCours) { surModifierNote(i) }
+                                .padding(horizontal = 4.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedTextField(
+                    value = etatAvis.commentaireSaisi,
+                    onValueChange = surModifierCommentaire,
+                    label = { Text("Commentaire (optionnel)") },
+                    enabled = !etatAvis.envoiEnCours,
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 3
+                )
+
+                etatAvis.erreurEnvoi?.let { message ->
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(message, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = surSoumettre, enabled = !etatAvis.envoiEnCours) {
+                if (etatAvis.envoiEnCours) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text("Envoyer")
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = surFermer, enabled = !etatAvis.envoiEnCours) {
+                Text("Annuler")
+            }
+        }
+    )
 }
 
 private fun formaterDuree(minutes: Int?): String {

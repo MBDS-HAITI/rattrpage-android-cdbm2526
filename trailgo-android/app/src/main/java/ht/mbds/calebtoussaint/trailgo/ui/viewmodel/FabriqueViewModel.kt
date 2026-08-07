@@ -8,11 +8,13 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.room.Room
 import ht.mbds.calebtoussaint.trailgo.data.api.ApiClient
 import ht.mbds.calebtoussaint.trailgo.data.api.AuthApiService
+import ht.mbds.calebtoussaint.trailgo.data.api.AvisApiService
 import ht.mbds.calebtoussaint.trailgo.data.api.FavorisApiService
 import ht.mbds.calebtoussaint.trailgo.data.api.GestionnaireJeton
 import ht.mbds.calebtoussaint.trailgo.data.api.ParcoursApiService
 import ht.mbds.calebtoussaint.trailgo.data.local.TrailGoDatabase
 import ht.mbds.calebtoussaint.trailgo.data.repository.AuthRepository
+import ht.mbds.calebtoussaint.trailgo.data.repository.AvisRepository
 import ht.mbds.calebtoussaint.trailgo.data.repository.FavorisRepository
 import ht.mbds.calebtoussaint.trailgo.data.repository.ParcoursRepository
 
@@ -28,6 +30,7 @@ object FabriqueViewModel {
     private var repositoryAuth: AuthRepository? = null
     private var repositoryParcours: ParcoursRepository? = null
     private var repositoryFavoris: FavorisRepository? = null
+    private var repositoryAvis: AvisRepository? = null
     private var baseDeDonnees: TrailGoDatabase? = null
 
     private fun obtenirGestionnaireJeton(context: Context): GestionnaireJeton {
@@ -67,6 +70,15 @@ object FabriqueViewModel {
             val retrofit = ApiClient.creerRetrofit(gestionnaireJeton)
             val favorisApi = retrofit.create(FavorisApiService::class.java)
             FavorisRepository(favorisApi).also { repositoryFavoris = it }
+        }
+    }
+
+    private fun obtenirRepositoryAvis(context: Context): AvisRepository {
+        return repositoryAvis ?: run {
+            val gestionnaireJeton = obtenirGestionnaireJeton(context)
+            val retrofit = ApiClient.creerRetrofit(gestionnaireJeton)
+            val avisApi = retrofit.create(AvisApiService::class.java)
+            AvisRepository(avisApi).also { repositoryAvis = it }
         }
     }
 
@@ -114,6 +126,15 @@ object FabriqueViewModel {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
                 return FavorisViewModel(obtenirRepositoryFavoris(context)) as T
+            }
+        }
+    }
+
+    fun creerFabriqueAvis(context: Context): ViewModelProvider.Factory {
+        return object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+                return AvisViewModel(obtenirRepositoryAvis(context)) as T
             }
         }
     }
